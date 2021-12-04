@@ -159,9 +159,13 @@ fn life_support_rating(
     LifeSupportRating(oxygen_generator_rating.0 * co2_scrubber_rating.0)
 }
 
-#[test]
-fn test_calculating_power_consumption() {
-    let input = "\
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_computing_power_consumption() {
+        let input = "\
         00100
         11110
         10110
@@ -175,79 +179,79 @@ fn test_calculating_power_consumption() {
         00010
         01010
     ";
-    let input = parse(input);
-    let (gamma_rate, epsilon_rate) = gamma_and_epsilon_rates(&input);
-    let power_consumption = power_consumption(gamma_rate, epsilon_rate);
-    assert_eq!(gamma_rate.0, 22);
-    assert_eq!(epsilon_rate.0, 9);
-    assert_eq!(power_consumption.0, 198);
-}
+        let input = parse(input);
+        let (gamma_rate, epsilon_rate) = gamma_and_epsilon_rates(&input);
+        let power_consumption = power_consumption(gamma_rate, epsilon_rate);
+        assert_eq!(gamma_rate.0, 22);
+        assert_eq!(epsilon_rate.0, 9);
+        assert_eq!(power_consumption.0, 198);
+    }
 
-#[test]
-fn test_oxygen_rating_uses_most_common_bits() {
-    // For 2nd column, 0 is the most common bit initially, but after processing the 1st
-    // column, the first two lines are discarded; after that, the most common value in
-    // the 2nd column is 1.
-    let input = "\
+    #[test]
+    fn test_oxygen_rating_uses_most_common_bits() {
+        // For 2nd column, 0 is the most common bit initially, but after processing the 1st
+        // column, the first two lines are discarded; after that, the most common value in
+        // the 2nd column is 1.
+        let input = "\
         000
         001
         111
         110
         101
         ";
-    let input = parse(input);
-    let (gamma_rate, _) = gamma_and_epsilon_rates(&input);
-    // Using the gamma_rate, we'd pick the wrong numbers:
-    assert_eq!(gamma_rate.0, 0b101);
-    let oxygen_rating = oxygen_generator_rating(&input);
-    assert_eq!(oxygen_rating.0, 0b111);
-}
+        let input = parse(input);
+        let (gamma_rate, _) = gamma_and_epsilon_rates(&input);
+        // Using the gamma_rate, we'd pick the wrong numbers:
+        assert_eq!(gamma_rate.0, 0b101);
+        let oxygen_rating = oxygen_generator_rating(&input);
+        assert_eq!(oxygen_rating.0, 0b111);
+    }
 
-#[test]
-fn test_oxygen_rating_prefers_high_bits() {
-    let input = "\
+    #[test]
+    fn test_oxygen_rating_prefers_high_bits() {
+        let input = "\
         000
         111
         ";
-    let input = parse(input);
-    let oxygen_rating = oxygen_generator_rating(&input);
-    assert_eq!(oxygen_rating.0, 0b111);
-}
+        let input = parse(input);
+        let oxygen_rating = oxygen_generator_rating(&input);
+        assert_eq!(oxygen_rating.0, 0b111);
+    }
 
-#[test]
-fn test_co2_scrubber_rating_uses_least_common_bits() {
-    // For 2nd column, 0 is the most common bit initially, but after processing the 1st
-    // column, the first two lines are discarded; after that, the most common value in
-    // the 2nd column is 1.
-    let input = "\
+    #[test]
+    fn test_co2_scrubber_rating_uses_least_common_bits() {
+        // For 2nd column, 0 is the most common bit initially, but after processing the 1st
+        // column, the first two lines are discarded; after that, the most common value in
+        // the 2nd column is 1.
+        let input = "\
         000
         001
         111
         110
         101
         ";
-    let input = parse(input);
-    let (_, epsilon_rate) = gamma_and_epsilon_rates(&input);
-    // Using the epsilon_rate, we'd pick the wrong numbers:
-    assert_eq!(epsilon_rate.0, 0b010);
-    let co2_scrubber_rating = co2_scrubber_rating(&input);
-    assert_eq!(co2_scrubber_rating.0, 0b000);
-}
+        let input = parse(input);
+        let (_, epsilon_rate) = gamma_and_epsilon_rates(&input);
+        // Using the epsilon_rate, we'd pick the wrong numbers:
+        assert_eq!(epsilon_rate.0, 0b010);
+        let co2_scrubber_rating = co2_scrubber_rating(&input);
+        assert_eq!(co2_scrubber_rating.0, 0b000);
+    }
 
-#[test]
-fn test_co2_scrubber_rating_prefers_low_bits() {
-    let input = "\
+    #[test]
+    fn test_co2_scrubber_rating_prefers_low_bits() {
+        let input = "\
         000
         111
         ";
-    let input = parse(input);
-    let oxygen_rating = co2_scrubber_rating(&input);
-    assert_eq!(oxygen_rating.0, 0b000);
-}
+        let input = parse(input);
+        let oxygen_rating = co2_scrubber_rating(&input);
+        assert_eq!(oxygen_rating.0, 0b000);
+    }
 
-#[test]
-fn test_life_support_rating() {
-    let input = "\
+    #[test]
+    fn test_life_support_rating() {
+        let input = "\
         00100
         11110
         10110
@@ -261,11 +265,12 @@ fn test_life_support_rating() {
         00010
         01010
         ";
-    let input = parse(input);
-    let oxygen_rating = oxygen_generator_rating(&input);
-    assert_eq!(oxygen_rating.0, 23);
-    let co2_scrubber_rating = co2_scrubber_rating(&input);
-    assert_eq!(co2_scrubber_rating.0, 10);
-    let life_support_rating = life_support_rating(oxygen_rating, co2_scrubber_rating);
-    assert_eq!(life_support_rating.0, 230);
+        let input = parse(input);
+        let oxygen_rating = oxygen_generator_rating(&input);
+        assert_eq!(oxygen_rating.0, 23);
+        let co2_scrubber_rating = co2_scrubber_rating(&input);
+        assert_eq!(co2_scrubber_rating.0, 10);
+        let life_support_rating = life_support_rating(oxygen_rating, co2_scrubber_rating);
+        assert_eq!(life_support_rating.0, 230);
+    }
 }
