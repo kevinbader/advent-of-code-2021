@@ -1,7 +1,7 @@
 use std::fs;
 
 fn main() {
-    let input = fs::read_to_string("../input/day2.txt").expect("failed to read input file");
+    let input = fs::read_to_string("./input/day2.txt").expect("failed to read input file");
     let input = parse(&input);
     let Distance {
         horizontal, depth, ..
