@@ -3,7 +3,9 @@ use std::fs;
 fn main() {
     let input = fs::read_to_string("../input/day2.txt").expect("failed to read input file");
     let input = parse(&input);
-    let Distance { horizontal, depth } = calculate_distance(&input);
+    let Distance {
+        horizontal, depth, ..
+    } = calculate_distance(&input);
     println!("{} * {} = {}", horizontal, depth, horizontal * depth);
 }
 
@@ -11,6 +13,7 @@ fn main() {
 struct Distance {
     horizontal: u32,
     depth: u32,
+    aim: u32,
 }
 
 enum Command {
@@ -41,23 +44,28 @@ fn parse(input: &str) -> Vec<Command> {
 
 fn calculate_distance(input: &[Command]) -> Distance {
     use Command::*;
-    input.iter().fold(
-        Distance::default(),
-        |Distance { horizontal, depth }, x| match x {
+    input.iter().fold(Distance::default(), |acc, command| {
+        let Distance {
+            horizontal,
+            depth,
+            aim,
+        } = acc;
+        match command {
             Forward(units) => Distance {
                 horizontal: horizontal + units,
-                depth,
+                depth: depth + aim * units,
+                ..acc
             },
             Down(units) => Distance {
-                horizontal,
-                depth: depth + units,
+                aim: aim + units,
+                ..acc
             },
             Up(units) => Distance {
-                horizontal,
-                depth: if *units > depth { 0 } else { depth - units },
+                aim: aim - units,
+                ..acc
             },
-        },
-    )
+        }
+    })
 }
 
 #[test]
@@ -71,7 +79,9 @@ fn test_calculating_distance() {
       forward 2
     ";
     let input = parse(input);
-    let Distance { horizontal, depth } = calculate_distance(&input);
+    let Distance {
+        horizontal, depth, ..
+    } = calculate_distance(&input);
     assert_eq!(horizontal, 15);
-    assert_eq!(depth, 10);
+    assert_eq!(depth, 60);
 }
