@@ -166,19 +166,19 @@ mod test {
     #[test]
     fn test_computing_power_consumption() {
         let input = "\
-        00100
-        11110
-        10110
-        10111
-        10101
-        01111
-        00111
-        11100
-        10000
-        11001
-        00010
-        01010
-    ";
+            00100
+            11110
+            10110
+            10111
+            10101
+            01111
+            00111
+            11100
+            10000
+            11001
+            00010
+            01010
+            ";
         let input = parse(input);
         let (gamma_rate, epsilon_rate) = gamma_and_epsilon_rates(&input);
         let power_consumption = power_consumption(gamma_rate, epsilon_rate);
@@ -193,12 +193,12 @@ mod test {
         // column, the first two lines are discarded; after that, the most common value in
         // the 2nd column is 1.
         let input = "\
-        000
-        001
-        111
-        110
-        101
-        ";
+            000
+            001
+            111
+            110
+            101
+            ";
         let input = parse(input);
         let (gamma_rate, _) = gamma_and_epsilon_rates(&input);
         // Using the gamma_rate, we'd pick the wrong numbers:
@@ -210,9 +210,9 @@ mod test {
     #[test]
     fn test_oxygen_rating_prefers_high_bits() {
         let input = "\
-        000
-        111
-        ";
+            000
+            111
+            ";
         let input = parse(input);
         let oxygen_rating = oxygen_generator_rating(&input);
         assert_eq!(oxygen_rating.0, 0b111);
@@ -224,12 +224,12 @@ mod test {
         // column, the first two lines are discarded; after that, the most common value in
         // the 2nd column is 1.
         let input = "\
-        000
-        001
-        111
-        110
-        101
-        ";
+            000
+            001
+            111
+            110
+            101
+            ";
         let input = parse(input);
         let (_, epsilon_rate) = gamma_and_epsilon_rates(&input);
         // Using the epsilon_rate, we'd pick the wrong numbers:
@@ -241,9 +241,9 @@ mod test {
     #[test]
     fn test_co2_scrubber_rating_prefers_low_bits() {
         let input = "\
-        000
-        111
-        ";
+            000
+            111
+            ";
         let input = parse(input);
         let oxygen_rating = co2_scrubber_rating(&input);
         assert_eq!(oxygen_rating.0, 0b000);
@@ -252,19 +252,19 @@ mod test {
     #[test]
     fn test_life_support_rating() {
         let input = "\
-        00100
-        11110
-        10110
-        10111
-        10101
-        01111
-        00111
-        11100
-        10000
-        11001
-        00010
-        01010
-        ";
+            00100
+            11110
+            10110
+            10111
+            10101
+            01111
+            00111
+            11100
+            10000
+            11001
+            00010
+            01010
+            ";
         let input = parse(input);
         let oxygen_rating = oxygen_generator_rating(&input);
         assert_eq!(oxygen_rating.0, 23);
