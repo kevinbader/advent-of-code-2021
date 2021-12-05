@@ -1,8 +1,9 @@
-use std::fs;
+use anyhow::{bail, Error};
+use std::{fs};
 
 fn main() {
     let input = fs::read_to_string("./input/day2.txt").expect("failed to read input file");
-    let input = parse(&input);
+    let input = parse(&input).unwrap();
     let Distance {
         horizontal, depth, ..
     } = calculate_distance(&input);
@@ -22,24 +23,29 @@ enum Command {
     Up(u32),
 }
 
-impl From<&str> for Command {
-    fn from(line: &str) -> Self {
+impl Command {
+    fn from(s: &str) -> anyhow::Result<Self> {
         use Command::*;
-        let parts = line.trim().split_whitespace().collect::<Vec<&str>>();
+        let parts = s.trim().split_whitespace().collect::<Vec<&str>>();
         assert_eq!(parts.len(), 2);
         let command = parts[0];
-        let arg = parts[1].parse::<u32>().expect("not u32");
-        match command {
+        let arg = parts[1].parse::<u32>()?;
+        let command = match command {
             "forward" => Forward(arg),
             "down" => Down(arg),
             "up" => Up(arg),
-            _ => panic!("unknown command"),
-        }
+            _ => bail!("unknown command: {}", command),
+        };
+        Ok(command)
     }
 }
 
-fn parse(input: &str) -> Vec<Command> {
-    input.trim().lines().map(|line| line.into()).collect()
+fn parse(input: &str) -> anyhow::Result<Vec<Command>> {
+    input
+        .trim()
+        .lines()
+        .map(|line| Command::from(line))
+        .collect::<Result<Vec<_>, Error>>()
 }
 
 fn calculate_distance(input: &[Command]) -> Distance {
@@ -78,7 +84,7 @@ fn test_calculating_distance() {
       down 8
       forward 2
     ";
-    let input = parse(input);
+    let input = parse(input).unwrap();
     let Distance {
         horizontal, depth, ..
     } = calculate_distance(&input);

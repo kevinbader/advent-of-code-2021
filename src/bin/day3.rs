@@ -1,8 +1,8 @@
-use std::fs;
+use std::{fs, num::ParseIntError, str::FromStr};
 
 fn main() {
     let input = fs::read_to_string("./input/day3.txt").expect("failed to read input file");
-    let input = parse(&input);
+    let input = input.parse().unwrap();
 
     let (gamma_rate, epsilon_rate) = gamma_and_epsilon_rates(&input);
     println!("gamma rate: {}", gamma_rate.0);
@@ -23,19 +23,23 @@ struct Input {
     values: Vec<u32>,
 }
 
-fn parse(input: &str) -> Input {
-    let lines: Vec<&str> = input.trim().lines().map(|line| line.trim()).collect();
-    assert!(!lines.is_empty());
-    let n_chars = lines[0].len();
-    assert!(n_chars <= u32::BITS.try_into().unwrap());
-    let n_diagnostic_bits = n_chars as u32;
-    let values = lines
-        .iter()
-        .map(|line| u32::from_str_radix(line, 2).expect("not binary or too large"))
-        .collect();
-    Input {
-        n_diagnostic_bits,
-        values,
+impl FromStr for Input {
+    type Err = ParseIntError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let lines: Vec<&str> = s.trim().lines().map(|line| line.trim()).collect();
+        assert!(!lines.is_empty());
+        let n_chars = lines[0].len();
+        assert!(n_chars <= u32::BITS.try_into().unwrap());
+        let n_diagnostic_bits = n_chars as u32;
+        let values = lines
+            .iter()
+            .map(|line| u32::from_str_radix(line, 2))
+            .collect::<Result<Vec<_>, ParseIntError>>()?;
+        Ok(Self {
+            n_diagnostic_bits,
+            values,
+        })
     }
 }
 
@@ -179,7 +183,7 @@ mod test {
             00010
             01010
             ";
-        let input = parse(input);
+        let input = input.parse().unwrap();
         let (gamma_rate, epsilon_rate) = gamma_and_epsilon_rates(&input);
         let power_consumption = power_consumption(gamma_rate, epsilon_rate);
         assert_eq!(gamma_rate.0, 22);
@@ -199,7 +203,7 @@ mod test {
             110
             101
             ";
-        let input = parse(input);
+        let input = input.parse().unwrap();
         let (gamma_rate, _) = gamma_and_epsilon_rates(&input);
         // Using the gamma_rate, we'd pick the wrong numbers:
         assert_eq!(gamma_rate.0, 0b101);
@@ -213,7 +217,7 @@ mod test {
             000
             111
             ";
-        let input = parse(input);
+        let input = input.parse().unwrap();
         let oxygen_rating = oxygen_generator_rating(&input);
         assert_eq!(oxygen_rating.0, 0b111);
     }
@@ -230,7 +234,7 @@ mod test {
             110
             101
             ";
-        let input = parse(input);
+        let input = input.parse().unwrap();
         let (_, epsilon_rate) = gamma_and_epsilon_rates(&input);
         // Using the epsilon_rate, we'd pick the wrong numbers:
         assert_eq!(epsilon_rate.0, 0b010);
@@ -244,7 +248,7 @@ mod test {
             000
             111
             ";
-        let input = parse(input);
+        let input = input.parse().unwrap();
         let oxygen_rating = co2_scrubber_rating(&input);
         assert_eq!(oxygen_rating.0, 0b000);
     }
@@ -265,7 +269,7 @@ mod test {
             00010
             01010
             ";
-        let input = parse(input);
+        let input = input.parse().unwrap();
         let oxygen_rating = oxygen_generator_rating(&input);
         assert_eq!(oxygen_rating.0, 23);
         let co2_scrubber_rating = co2_scrubber_rating(&input);
