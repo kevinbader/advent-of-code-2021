@@ -113,14 +113,14 @@ fn oxygen_generator_rating(
 }
 
 fn split_by_bit(values: Vec<u32>, mask: u32) -> (Vec<u32>, Vec<u32>) {
-    let acc = (vec![], vec![]);
-    values.into_iter().fold(acc, |mut acc, value| {
+    let mut acc = (vec![], vec![]);
+    for value in values {
         match value & mask {
             0 => acc.0.push(value),
             _ => acc.1.push(value),
         };
-        acc
-    })
+    }
+    acc
 }
 
 fn co2_scrubber_rating(
