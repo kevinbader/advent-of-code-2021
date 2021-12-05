@@ -109,7 +109,7 @@ fn parse(s: &str) -> anyhow::Result<(Vec<Board>, DrawnNumbers)> {
     // first line is drawn numbers:
     let drawn_numbers =
         DrawnNumbers::try_from(lines.next().map(|l| l.trim()).expect("no lines to parse"))
-            .with_context(|| "Failed to parse the first line")?;
+            .context("Failed to parse the first line")?;
     // every 5 lines is a board; skip empty lines
     let boards = lines
         .map(|l| l.trim())
