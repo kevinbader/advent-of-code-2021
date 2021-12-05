@@ -59,8 +59,7 @@ impl Board {
             self.marks[row][col] = true;
 
             if self.is_bingo() {
-                let last_num = self.fields[row][col];
-                let score = self.score(last_num);
+                let score = self.score(num);
                 BoardResult::Bingo { score }
             } else {
                 BoardResult::NoBingo
