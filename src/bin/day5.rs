@@ -67,9 +67,18 @@ impl Line {
         match (self.0, self.1) {
             (Coord { y: y0, .. }, Coord { y: y1, .. }) if y0 == y1 => Horizontal,
             (Coord { x: x0, .. }, Coord { x: x1, .. }) if x0 == x1 => Vertical,
-            _ => {
-                println!("skipping {}", self);
-                Other
+            (Coord { x: x0, y: y0 }, Coord { x: x1, y: y1 }) => {
+                let x_diff = if x1 > x0 { x1 - x0 } else { x0 - x1 };
+                let y_diff = if y1 > y0 { y1 - y0 } else { y0 - y1 };
+                if x_diff != y_diff {
+                    panic!("Not a 45% diagonal line: {}", self);
+                }
+                match (x1 > x0, y1 > y0) {
+                    (true, true) => TopLeftBottomRight,
+                    (true, false) => BottomLeftTopRight,
+                    (false, true) => TopRightBottomLeft,
+                    (false, false) => BottomRightTopLeft,
+                }
             }
         }
     }
@@ -97,8 +106,42 @@ impl Line {
                 };
                 (top.y..=bottom.y).map(|y| Coord { x, y }).collect()
             }
-            // ignore any other alignment for now
-            _ => vec![],
+            TopLeftBottomRight => {
+                let diff = self.1.x - self.0.x;
+                (0..=diff)
+                    .map(|offset| Coord {
+                        x: self.0.x + offset,
+                        y: self.0.y + offset,
+                    })
+                    .collect()
+            }
+            BottomLeftTopRight => {
+                let diff = self.1.x - self.0.x;
+                (0..=diff)
+                    .map(|offset| Coord {
+                        x: self.0.x + offset,
+                        y: self.0.y - offset,
+                    })
+                    .collect()
+            }
+            TopRightBottomLeft => {
+                let diff = self.0.x - self.1.x;
+                (0..=diff)
+                    .map(|offset| Coord {
+                        x: self.0.x - offset,
+                        y: self.0.y + offset,
+                    })
+                    .collect()
+            }
+            BottomRightTopLeft => {
+                let diff = self.0.x - self.1.x;
+                (0..=diff)
+                    .map(|offset| Coord {
+                        x: self.0.x - offset,
+                        y: self.0.y - offset,
+                    })
+                    .collect()
+            }
         }
     }
 }
@@ -112,7 +155,10 @@ impl Display for Line {
 enum Alignment {
     Horizontal,
     Vertical,
-    Other,
+    TopLeftBottomRight,
+    BottomLeftTopRight,
+    TopRightBottomLeft,
+    BottomRightTopLeft,
 }
 
 fn parse(input: &str) -> Vec<Line> {
@@ -166,11 +212,11 @@ mod test {
     #[test]
     fn test_dangerous_areas() {
         let lines = parse(INPUT);
-        assert_eq!(n_dangerous_areas(&lines), 5);
+        assert_eq!(n_dangerous_areas(&lines), 12);
     }
 
     #[test]
-    fn test_line_points() {
+    fn test_horizontal_line() {
         let line = Line::from("0,9 -> 5,9");
         let points = line.points();
         assert_eq!(
@@ -182,6 +228,91 @@ mod test {
                 Coord { x: 3, y: 9 },
                 Coord { x: 4, y: 9 },
                 Coord { x: 5, y: 9 }
+            ]
+        );
+    }
+
+    #[test]
+    fn test_vertical_line() {
+        let line = Line::from("5,0 -> 5,5");
+        let points = line.points();
+        assert_eq!(
+            points,
+            vec![
+                Coord { x: 5, y: 0 },
+                Coord { x: 5, y: 1 },
+                Coord { x: 5, y: 2 },
+                Coord { x: 5, y: 3 },
+                Coord { x: 5, y: 4 },
+                Coord { x: 5, y: 5 }
+            ]
+        );
+    }
+
+    #[test]
+    fn test_diagonal_line_tlbr() {
+        let line = Line::from("0,0 -> 5,5");
+        let points = line.points();
+        assert_eq!(
+            points,
+            vec![
+                Coord { x: 0, y: 0 },
+                Coord { x: 1, y: 1 },
+                Coord { x: 2, y: 2 },
+                Coord { x: 3, y: 3 },
+                Coord { x: 4, y: 4 },
+                Coord { x: 5, y: 5 }
+            ]
+        );
+    }
+
+    #[test]
+    fn test_diagonal_line_bltr() {
+        let line = Line::from("0,5 -> 5,0");
+        let points = line.points();
+        assert_eq!(
+            points,
+            vec![
+                Coord { x: 0, y: 5 },
+                Coord { x: 1, y: 4 },
+                Coord { x: 2, y: 3 },
+                Coord { x: 3, y: 2 },
+                Coord { x: 4, y: 1 },
+                Coord { x: 5, y: 0 }
+            ]
+        );
+    }
+
+    #[test]
+    fn test_diagonal_line_trbl() {
+        let line = Line::from("5,0 -> 0,5");
+        let points = line.points();
+        assert_eq!(
+            points,
+            vec![
+                Coord { x: 5, y: 0 },
+                Coord { x: 4, y: 1 },
+                Coord { x: 3, y: 2 },
+                Coord { x: 2, y: 3 },
+                Coord { x: 1, y: 4 },
+                Coord { x: 0, y: 5 }
+            ]
+        );
+    }
+
+    #[test]
+    fn test_diagonal_line_brtl() {
+        let line = Line::from("5,5 -> 0,0");
+        let points = line.points();
+        assert_eq!(
+            points,
+            vec![
+                Coord { x: 5, y: 5 },
+                Coord { x: 4, y: 4 },
+                Coord { x: 3, y: 3 },
+                Coord { x: 2, y: 2 },
+                Coord { x: 1, y: 1 },
+                Coord { x: 0, y: 0 },
             ]
         );
     }
