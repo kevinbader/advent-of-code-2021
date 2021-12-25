@@ -19,7 +19,7 @@ impl Coord {
     fn from(s: &str) -> Self {
         let nums: Vec<usize> = s
             .trim()
-            .split(",")
+            .split(',')
             .map(|s| s.trim().parse::<usize>().unwrap())
             .collect();
         assert_eq!(nums.len(), 2);
