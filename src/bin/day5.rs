@@ -41,7 +41,7 @@ struct Line(Coord, Coord);
 
 impl Line {
     fn from(s: &str) -> Self {
-        let coords: Vec<Coord> = s.trim().split("->").map(|s| Coord::from(s)).collect();
+        let coords: Vec<Coord> = s.trim().split("->").map(Coord::from).collect();
         assert_eq!(coords.len(), 2);
         Self(coords[0], coords[1])
     }
@@ -162,7 +162,7 @@ enum Alignment {
 }
 
 fn parse(input: &str) -> Vec<Line> {
-    input.trim().lines().map(|line| Line::from(line)).collect()
+    input.trim().lines().map(Line::from).collect()
 }
 
 fn n_dangerous_areas(lines: &[Line]) -> usize {

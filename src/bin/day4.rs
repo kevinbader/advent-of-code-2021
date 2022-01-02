@@ -135,7 +135,7 @@ fn parse(s: &str) -> anyhow::Result<(Vec<Board>, DrawnNumbers)> {
         .filter(|l| !l.is_empty())
         .collect::<Vec<&str>>()
         .chunks_exact(5)
-        .map(|lines| Board::try_from(lines))
+        .map(Board::try_from)
         .collect::<Result<Vec<_>, anyhow::Error>>()?;
     Ok((boards, drawn_numbers))
 }

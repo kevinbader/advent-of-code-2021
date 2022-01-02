@@ -1,5 +1,5 @@
 use anyhow::{bail, Error};
-use std::{fs};
+use std::fs;
 
 fn main() {
     let input = fs::read_to_string("./input/day2.txt").expect("failed to read input file");
@@ -44,7 +44,7 @@ fn parse(input: &str) -> anyhow::Result<Vec<Command>> {
     input
         .trim()
         .lines()
-        .map(|line| Command::from(line))
+        .map(Command::from)
         .collect::<Result<Vec<_>, Error>>()
 }
 
