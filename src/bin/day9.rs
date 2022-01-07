@@ -1,11 +1,16 @@
-use std::fs;
+use std::{collections::VecDeque, fs};
+
+use itertools::Itertools;
 
 fn main() {
     let input = fs::read_to_string("./input/day9.txt").expect("failed to read input file");
-    let low_points = low_points_of(&parse(&input));
+    let matrix = parse(&input);
+    let low_points = low_points_of(&matrix);
     let risk_levels = risk_levels_of(&low_points);
-    println!("risk levels: {:?}", risk_levels);
-    println!("sum: {:?}", risk_levels.iter().sum::<u32>());
+    println!("[part1] sum: {:?}", risk_levels.iter().sum::<u32>());
+    let basins = basins_in(&matrix);
+    let score = three_largest_basins_size_product(&basins);
+    println!("[part2] score: {:?}", score);
 }
 
 type RiskLevel = u32;
@@ -76,6 +81,75 @@ fn risk_levels_of(values: &[Point]) -> Vec<RiskLevel> {
     values.iter().map(|x| x.value + 1).collect()
 }
 
+#[derive(Debug, Default)]
+struct Basin<'a> {
+    points: Vec<&'a Point>,
+    size: usize,
+}
+impl<'a> Basin<'a> {
+    fn add(&mut self, point: &'a Point) {
+        self.points.push(point);
+        self.size += 1;
+    }
+}
+
+#[allow(clippy::ptr_arg)]
+fn basins_in<'a>(matrix: &'a Matrix) -> Vec<Basin<'a>> {
+    // We iterate through all of the points, but we remember and skip those already
+    // visited. For each point we visit, we try to extend those the boundaries of the
+    // basin (the '9's).
+    let n_rows = matrix.len();
+    let n_cols = matrix[0].len();
+    let mut visited = vec![vec![false; n_cols]; n_rows];
+    const BASIN_BOUNDARY: u32 = 9;
+    let mut basins = vec![];
+    for (y, row) in matrix.iter().enumerate() {
+        for (x, point) in row.iter().enumerate() {
+            if visited[y][x] || point.value == BASIN_BOUNDARY {
+                continue;
+            }
+            // This is a new basin
+            let mut basin = Basin::default();
+            let mut queue = VecDeque::from([point]);
+            while let Some(p) = queue.pop_front() {
+                // Have we been here already? Or is this a boundary?
+                let (x, y) = p.location;
+                if visited[y][x] || p.value == BASIN_BOUNDARY {
+                    continue;
+                }
+                visited[y][x] = true;
+                // We haven't seen this and it's not a boundary => it belongs to the basin!
+                basin.add(p);
+                // Add the neighbors to look at them later:
+                if y > 0 {
+                    queue.push_back(&matrix[y - 1][x]);
+                }
+                if y < (n_rows - 1) {
+                    queue.push_back(&matrix[y + 1][x]);
+                }
+                if x > 0 {
+                    queue.push_back(&matrix[y][x - 1]);
+                }
+                if x < (n_cols - 1) {
+                    queue.push_back(&matrix[y][x + 1]);
+                }
+            }
+            basins.push(basin);
+        }
+    }
+    basins
+}
+
+fn three_largest_basins_size_product(basins: &[Basin]) -> usize {
+    basins
+        .iter()
+        .map(|x| x.size)
+        .sorted_unstable()
+        .rev()
+        .take(3)
+        .product()
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -98,5 +172,13 @@ mod test {
 
         let low_points: Vec<u32> = low_points.iter().map(|x| x.value).collect();
         assert_eq!(low_points, vec![1, 0, 5, 5]);
+    }
+
+    #[test]
+    fn test_basins() {
+        let matrix = parse(INPUT);
+        let basins = basins_in(&matrix);
+        let score = three_largest_basins_size_product(&basins);
+        assert_eq!(score, 1134);
     }
 }
