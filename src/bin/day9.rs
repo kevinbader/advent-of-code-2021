@@ -9,18 +9,33 @@ fn main() {
 }
 
 type RiskLevel = u32;
-type Point = u32;
+
+#[derive(Debug, Clone, Copy)]
+struct Point {
+    location: (usize, usize),
+    value: u32,
+}
+impl Point {
+    fn new(location: (usize, usize), value: u32) -> Self {
+        Self { location, value }
+    }
+}
 type Matrix = Vec<Vec<Point>>;
 
 fn parse(input: &str) -> Matrix {
     let mut rows = vec![];
-    for line in input.lines() {
+    for (line_no, line) in input.lines().enumerate() {
         let line = line.trim();
         if line.is_empty() {
             continue;
         }
 
-        let row = line.chars().map(|c| c.to_digit(10).expect("NaN")).collect();
+        let row = line
+            .chars()
+            .map(|c| c.to_digit(10).expect("NaN"))
+            .enumerate()
+            .map(|(pos, val)| Point::new((pos, line_no), val))
+            .collect();
         rows.push(row);
     }
     rows
@@ -49,7 +64,7 @@ fn low_points_of(matrix: &Matrix) -> Vec<Point> {
                 field.push(matrix[r][c + 1]);
             }
             // The point we're looking at is a low point iff all its neighbors are higher.
-            if field.iter().all(|p| p > point) {
+            if field.iter().all(|p| p.value > point.value) {
                 low_points.push(*point);
             }
         }
@@ -58,7 +73,7 @@ fn low_points_of(matrix: &Matrix) -> Vec<Point> {
 }
 
 fn risk_levels_of(values: &[Point]) -> Vec<RiskLevel> {
-    values.iter().map(|x| x + 1).collect()
+    values.iter().map(|x| x.value + 1).collect()
 }
 
 #[cfg(test)]
@@ -76,14 +91,12 @@ mod test {
     #[test]
     fn test_low_points() {
         let low_points = low_points_of(&parse(INPUT));
-        assert_eq!(low_points, vec![1, 0, 5, 5]);
-    }
 
-    #[test]
-    fn test_risk_level() {
-        let low_points = vec![1, 0, 5, 5];
         let risk_levels = risk_levels_of(&low_points);
         assert_eq!(risk_levels, vec![2, 1, 6, 6]);
         assert_eq!(risk_levels.iter().sum::<u32>(), 15);
+
+        let low_points: Vec<u32> = low_points.iter().map(|x| x.value).collect();
+        assert_eq!(low_points, vec![1, 0, 5, 5]);
     }
 }
