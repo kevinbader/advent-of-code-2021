@@ -94,7 +94,7 @@ impl<'a> Basin<'a> {
 }
 
 #[allow(clippy::ptr_arg)]
-fn basins_in<'a>(matrix: &'a Matrix) -> Vec<Basin<'a>> {
+fn basins_in(matrix: &Matrix) -> Vec<Basin> {
     // We iterate through all of the points, but we remember and skip those already
     // visited. For each point we visit, we try to extend those the boundaries of the
     // basin (the '9's).
