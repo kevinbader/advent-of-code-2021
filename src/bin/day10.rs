@@ -28,16 +28,20 @@ impl<'a> ParseLineResult<'a> {
 }
 
 struct SyntaxError {
+    #[allow(dead_code)]
     pos: usize,
+    #[allow(dead_code)]
     expected: char,
     actual: Option<char>,
 }
 
 struct IncompleteLine<'a> {
+    #[allow(dead_code)]
     line: &'a str,
     open_symbols: Vec<char>,
 }
 impl<'a> IncompleteLine<'a> {
+    #[allow(dead_code)]
     fn completed(&self) -> String {
         format!("{}{}", self.line, self.completion())
     }
